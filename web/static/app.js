@@ -3102,6 +3102,22 @@ function dismissPendingUpload(filename) {
     renderImagesTable();
 }
 
+function imageOperationsHTML(img, health = computeImageHealth(img)) {
+    const progress = extractionProgress[img.filename];
+    if (progress) {
+        return `
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress.progress}%"></div>
+                </div>
+                <div class="progress-text">${escapeHtml(progress.status)}</div>
+            </div>`;
+    }
+    return health === 'ok'
+        ? '<span style="color: #4caf50;">✓ Ready</span>'
+        : '<span style="color: var(--warning-hover); font-weight:500;">⚠ ' + escapeHtml(health.reason) + '</span>';
+}
+
 function imageRowHTML(img, includeGroupCell, depth = 0) {
     const groupCell = includeGroupCell ? `
                         <td>
@@ -3116,7 +3132,7 @@ function imageRowHTML(img, includeGroupCell, depth = 0) {
     const rowTitle = health === 'ok' ? '' : ` title="${escapeHtml(health.reason)}"`;
     const checked = selectedImageFilenames.has(img.filename) ? 'checked' : '';
     return `
-                    <tr class="${rowClass}"${rowTitle} onclick="showImagePropertiesModal('${img.filename}')">
+                    <tr class="${rowClass}" data-image-filename="${_attrEscape(img.filename)}"${rowTitle} onclick="showImagePropertiesModal('${img.filename}')">
                         <td class="col-check" onclick="event.stopPropagation()"><input type="checkbox" ${checked} onchange="toggleImageSelection('${img.filename}', this.checked)"></td>
                         <td class="col-logo">${distroLogoHTML(img.distro)}</td>
                         <td${namePadStyle}>${img.name}</td>
@@ -3158,17 +3174,7 @@ function imageRowHTML(img, includeGroupCell, depth = 0) {
                             }
                         </td>
                         <td class="operations-cell">
-                            ${extractionProgress[img.filename] ? `
-                                <div class="progress-container">
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${extractionProgress[img.filename].progress}%"></div>
-                                    </div>
-                                    <div class="progress-text">${extractionProgress[img.filename].status}</div>
-                                </div>
-                            ` : (health !== 'ok'
-                                ? '<span style="color: var(--warning-hover); font-weight:500;">⚠ '+escapeHtml(health.reason)+'</span>'
-                                : '<span style="color: #4caf50;">✓ Ready</span>'
-                            )}
+                            ${imageOperationsHTML(img, health)}
                         </td>
                     </tr>`;
 }
@@ -3295,14 +3301,20 @@ function renderImagesTable() {
         }
     }
 
-    container.innerHTML = `
-        <div class="table-scroll">
+    const tableHTML = `
         <table>
             <thead>${theadHtml}</thead>
             <tbody>${uploadHtml}${bodyHtml}</tbody>
-        </table>
-        </div>
-    `;
+        </table>`;
+    const scroller = container.querySelector('.table-scroll');
+    if (scroller) {
+        const { scrollTop, scrollLeft } = scroller;
+        scroller.innerHTML = tableHTML;
+        scroller.scrollTop = scrollTop;
+        scroller.scrollLeft = scrollLeft;
+    } else {
+        container.innerHTML = `<div class="table-scroll">${tableHTML}</div>`;
+    }
     updateImagesBulkUI();
 }
 
@@ -3441,7 +3453,18 @@ function updateImagePropsProgress(filename) {
 }
 
 function syncImagesProgress(filename) {
-    renderImagesTable();
+    const cell = document.querySelector(`#images-table tr[data-image-filename="${CSS.escape(filename)}"] .operations-cell`);
+    if (cell) {
+        const progress = extractionProgress[filename];
+        const fill = cell.querySelector('.progress-fill');
+        if (progress && fill) {
+            fill.style.width = progress.progress + '%';
+            cell.querySelector('.progress-text').textContent = progress.status;
+        } else {
+            const img = images.find(i => i.filename === filename);
+            if (img) cell.innerHTML = imageOperationsHTML(img);
+        }
+    }
     updateImagePropsProgress(filename);
 }
 

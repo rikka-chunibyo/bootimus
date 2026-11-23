@@ -41,6 +41,62 @@ test('an ISO properties request can fail without logging out a valid session', a
   expect(await page.evaluate(() => localStorage.getItem('bootimus_token'))).toBeTruthy();
 });
 
+test('the image list stays scrolled during extraction and after it completes', async ({ page }) => {
+  const images = Array.from({ length: 40 }, (_, i) => {
+    const number = String(i).padStart(2, '0');
+    return { name: `Test ISO ${number}`, filename: `test-${number}.iso`, size: 1024, boot_method: 'sanboot' };
+  });
+  const image = images[0];
+  let finishExtraction!: () => void;
+  const extractionDone = new Promise<void>(resolve => { finishExtraction = resolve; });
+  let extracted = false;
+  let polls = 0;
+
+  await page.route(/\/api\/images$/, route => route.fulfill({
+    json: { success: true, data: extracted
+      ? [{ ...image, extracted: true, boot_method: 'kernel' }, ...images.slice(1)]
+      : images },
+  }));
+  await page.route('**/api/images/extract?*', async route => {
+    await extractionDone;
+    extracted = true;
+    await route.fulfill({ json: { success: true } });
+  });
+  await page.route('**/api/images/extract-progress?*', route => route.fulfill({
+    json: { success: true, data: { status: 'running', percent: 50, stage: `Extracting files (${++polls})` } },
+  }));
+
+  try {
+    await loginAsAdmin(page);
+    await openTab(page, 'images');
+    const scroller = page.locator('#images-table .table-scroll');
+    const row = scroller.getByRole('row').filter({ hasText: image.filename });
+    await row.getByRole('cell', { name: image.name, exact: true }).click();
+    const modal = page.locator('#image-properties-modal');
+    await modal.getByRole('button', { name: 'Extract', exact: true }).click();
+    await expect(modal.locator('#image-props-progress-text')).toHaveText(/Starting extraction|Extracting files/);
+    await modal.getByRole('button', { name: 'Cancel', exact: true }).click();
+
+    const progress = row.locator('.progress-text');
+    await expect(progress).toHaveText(/Extracting files/);
+    const scrollTop = await scroller.evaluate(element => {
+      element.scrollTop = 300;
+      return element.scrollTop;
+    });
+    expect(scrollTop).toBeGreaterThan(0);
+
+    const stage = await progress.textContent();
+    await expect(progress).not.toHaveText(stage!);
+    expect(await scroller.evaluate(element => element.scrollTop)).toBe(scrollTop);
+
+    finishExtraction();
+    await expect(row.getByText('Kernel', { exact: true })).toBeVisible();
+    expect(await scroller.evaluate(element => element.scrollTop)).toBe(scrollTop);
+  } finally {
+    finishExtraction();
+  }
+});
+
 test('a rejected session still returns to the login screen', async ({ page }) => {
   await loginAsAdmin(page);
   for (const path of ['me', 'scan']) {
