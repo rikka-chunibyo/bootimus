@@ -92,7 +92,7 @@ const TRANSLATIONS = {
         'server.metric.memory': 'Memory',
         'server.metric.disk': 'Disk',
         'server.metric.cores_available': '{{n}} cores available',
-        'server.metric.memory_detail': '{{used}} used of {{total}}',
+        'server.metric.memory_detail': '{{available}} available of {{total}}',
         'server.metric.disk_detail': '{{free}} free of {{total}}',
 
         'server.env.empty': 'No environment variables set',
@@ -301,7 +301,7 @@ const TRANSLATIONS = {
         'server.metric.memory': 'Arbeitsspeicher',
         'server.metric.disk': 'Datenträger',
         'server.metric.cores_available': '{{n}} Kerne verfügbar',
-        'server.metric.memory_detail': '{{used}} von {{total}} belegt',
+        'server.metric.memory_detail': '{{available}} von {{total}} verfügbar',
         'server.metric.disk_detail': '{{free}} frei von {{total}}',
 
         'server.env.empty': 'Keine Umgebungsvariablen gesetzt',
@@ -510,7 +510,7 @@ const TRANSLATIONS = {
         'server.metric.memory': 'Mémoire',
         'server.metric.disk': 'Disque',
         'server.metric.cores_available': '{{n}} cœurs disponibles',
-        'server.metric.memory_detail': '{{used}} utilisés sur {{total}}',
+        'server.metric.memory_detail': '{{available}} disponibles sur {{total}}',
         'server.metric.disk_detail': '{{free}} libres sur {{total}}',
 
         'server.env.empty': "Aucune variable d'environnement définie",
@@ -719,7 +719,7 @@ const TRANSLATIONS = {
         'server.metric.memory': 'Memoria',
         'server.metric.disk': 'Disco',
         'server.metric.cores_available': '{{n}} núcleos disponibles',
-        'server.metric.memory_detail': '{{used}} usados de {{total}}',
+        'server.metric.memory_detail': '{{available}} disponibles de {{total}}',
         'server.metric.disk_detail': '{{free}} libres de {{total}}',
 
         'server.env.empty': 'No hay variables de entorno definidas',
@@ -928,7 +928,7 @@ const TRANSLATIONS = {
         'server.metric.memory': 'Memoria',
         'server.metric.disk': 'Disco',
         'server.metric.cores_available': '{{n}} core disponibili',
-        'server.metric.memory_detail': '{{used}} usati su {{total}}',
+        'server.metric.memory_detail': '{{available}} disponibili su {{total}}',
         'server.metric.disk_detail': '{{free}} liberi su {{total}}',
 
         'server.env.empty': 'Nessuna variabile di ambiente impostata',
@@ -1137,7 +1137,7 @@ const TRANSLATIONS = {
         'server.metric.memory': 'Geheugen',
         'server.metric.disk': 'Schijf',
         'server.metric.cores_available': '{{n}} cores beschikbaar',
-        'server.metric.memory_detail': '{{used}} van {{total}} gebruikt',
+        'server.metric.memory_detail': '{{available}} van {{total}} beschikbaar',
         'server.metric.disk_detail': '{{free}} van {{total}} vrij',
 
         'server.env.empty': 'Geen omgevingsvariabelen ingesteld',
@@ -1346,7 +1346,7 @@ const TRANSLATIONS = {
         'server.metric.memory': 'Память',
         'server.metric.disk': 'Диск',
         'server.metric.cores_available': '{{n}} ядер доступно',
-        'server.metric.memory_detail': '{{used}} из {{total}} используется',
+        'server.metric.memory_detail': '{{available}} доступно из {{total}}',
         'server.metric.disk_detail': '{{free}} свободно из {{total}}',
 
         'server.env.empty': 'Переменные окружения не заданы',
@@ -1555,7 +1555,7 @@ const TRANSLATIONS = {
         'server.metric.memory': '内存',
         'server.metric.disk': '磁盘',
         'server.metric.cores_available': '可用 {{n}} 核',
-        'server.metric.memory_detail': '已用 {{used}} / 共 {{total}}',
+        'server.metric.memory_detail': '可用 {{available}} / 共 {{total}}',
         'server.metric.disk_detail': '可用 {{free}} / 共 {{total}}',
 
         'server.env.empty': '未设置任何环境变量',

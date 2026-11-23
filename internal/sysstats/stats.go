@@ -9,7 +9,6 @@ import (
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
-	"github.com/shirou/gopsutil/v3/mem"
 )
 
 type Stats struct {
@@ -77,13 +76,7 @@ func GetStats(paths []string) (*Stats, error) {
 	}
 	stats.CPU.Cores = runtime.NumCPU()
 
-	vmStat, err := mem.VirtualMemory()
-	if err == nil {
-		stats.Memory.Total = vmStat.Total
-		stats.Memory.Used = vmStat.Used
-		stats.Memory.Free = vmStat.Available
-		stats.Memory.UsedPercent = vmStat.UsedPercent
-	}
+	stats.Memory = getMemoryStats()
 
 	for _, path := range paths {
 		diskStat, err := getDiskStats(path)

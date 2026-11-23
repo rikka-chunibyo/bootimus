@@ -87,6 +87,14 @@ Bootimus automatically creates subdirectories:
 - `/data/bootloaders/` - Custom bootloader files (optional)
 - `/data/bootimus.db` - SQLite database (if using SQLite mode)
 
+### Memory reporting
+
+On Linux, the dashboard accounts for cgroup v2 memory limits and shows how
+much RAM is available. Docker nested inside an LXC can hide the LXC's cgroup.
+In that case, set `BOOTIMUS_MEMORY_INFO` to the path of a read-only memory
+snapshot refreshed from outside Docker, in the LXC itself. The snapshot needs
+the `MemTotal` and `MemAvailable` lines from the LXC's `/proc/meminfo`.
+
 ## Networking Configuration
 
 ### Default Internal Bridge Network

@@ -1353,7 +1353,7 @@ function renderServerInfo(info) {
             t('server.metric.memory'),
             sysStats.memory.used_percent,
             t('server.metric.memory_detail', {
-                used: formatBytes(sysStats.memory.used),
+                available: formatBytes(sysStats.memory.free),
                 total: formatBytes(sysStats.memory.total),
             })
         );
