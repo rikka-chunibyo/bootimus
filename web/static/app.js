@@ -18,15 +18,21 @@ function clearToken() {
 
 async function authFetch(url, options = {}) {
     const token = getToken();
-    if (token) {
-        options.headers = options.headers || {};
-        options.headers['Authorization'] = 'Bearer ' + token;
-    }
-    const res = await fetch(url, options);
-    if (res.status === 401) {
-        clearToken();
-        showLoginScreen();
-        throw new Error('Authentication required');
+    const headers = new Headers(options.headers);
+    if (token) headers.set('Authorization', 'Bearer ' + token);
+    const res = await fetch(url, { ...options, headers });
+    if (res.status === 401 && token && token === getToken()) {
+        const sessionURL = `${API_BASE}/me`;
+        // Confirm the current session independently before an unrelated request signs it out.
+        const rejected = url === sessionURL || await fetch(sessionURL, {
+            headers: { Authorization: 'Bearer ' + token },
+            cache: 'no-store',
+        }).then(session => session.status === 401, () => false);
+        if (rejected && token === getToken()) {
+            clearToken();
+            showLoginScreen();
+            throw new Error('Authentication required');
+        }
     }
     return res;
 }
@@ -174,7 +180,7 @@ async function checkAuth() {
     }
 
     try {
-        const res = await authFetch(`${API_BASE}/stats`);
+        const res = await authFetch(`${API_BASE}/me`, { cache: 'no-store' });
         if (res.ok) {
             showApp();
             initApp();
@@ -5455,7 +5461,7 @@ function renderGetImagesList(filter) {
     let html = '';
     for (const distro of (isoCatalog.distros || [])) {
         const matching = (distro.releases || []).filter(r =>
-            !q || distro.name.toLowerCase().includes(q) || r.label.toLowerCase().includes(q) || distro.id.toLowerCase().includes(q)
+            !q || `${distro.name} ${r.label}`.toLowerCase().includes(q) || distro.id.toLowerCase().includes(q)
         );
         if (matching.length === 0) continue;
         html += `<div class="get-iso-distro"><h3>${escapeHtml(distro.name)}</h3>`;

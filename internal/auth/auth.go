@@ -18,6 +18,7 @@ import (
 	"bootimus/internal/models"
 
 	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/gorm"
 )
 
 type Manager struct {
@@ -326,7 +327,11 @@ func (m *Manager) authenticate(w http.ResponseWriter, r *http.Request) (*Claims,
 	claims, err := m.AuthenticateToken(tokenString)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnauthorized)
+		status := http.StatusUnauthorized
+		if errors.Is(err, ErrAuthUnavailable) {
+			status = http.StatusServiceUnavailable
+		}
+		w.WriteHeader(status)
 		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
 		return nil, false
 	}
@@ -334,8 +339,9 @@ func (m *Manager) authenticate(w http.ResponseWriter, r *http.Request) (*Claims,
 }
 
 var (
-	ErrInvalidToken = errors.New("Invalid or expired token")
-	ErrUserDisabled = errors.New("User account disabled")
+	ErrInvalidToken    = errors.New("Invalid or expired token")
+	ErrUserDisabled    = errors.New("User account disabled")
+	ErrAuthUnavailable = errors.New("Authentication is temporarily unavailable")
 )
 
 func (m *Manager) AuthenticateToken(tokenString string) (*Claims, error) {
@@ -347,7 +353,14 @@ func (m *Manager) AuthenticateToken(tokenString string) (*Claims, error) {
 		return nil, ErrInvalidToken
 	}
 	user, err := m.userStore.GetUser(claims.Username)
-	if err != nil || !user.Enabled {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, ErrUserDisabled
+	}
+	if err != nil {
+		log.Printf("Auth: Could not check user account: %v", err)
+		return nil, ErrAuthUnavailable
+	}
+	if !user.Enabled {
 		return nil, ErrUserDisabled
 	}
 	claims.IsAdmin = user.IsAdmin

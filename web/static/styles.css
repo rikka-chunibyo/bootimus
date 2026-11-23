@@ -1,4 +1,6 @@
 :root {
+    color-scheme: light;
+    scrollbar-color: var(--text-muted) var(--bg-tertiary);
     --bg-primary: #f5f5f5;
     --bg-secondary: #ffffff;
     --bg-tertiary: #f0f0f0;
@@ -31,6 +33,7 @@
 }
 
 [data-theme="dark"] {
+    color-scheme: dark;
     --bg-primary: #0a0a0a;
     --bg-secondary: #141414;
     --bg-tertiary: #1e1e1e;
@@ -741,16 +744,16 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
     min-height: 0;
     scrollbar-width: thin;
 }
-.table-scroll::-webkit-scrollbar { height: 12px; width: 12px; }
-.table-scroll::-webkit-scrollbar-track { background: var(--bg-tertiary); }
-.table-scroll::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 6px; }
-.table-scroll::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+::-webkit-scrollbar { height: 10px; width: 10px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: var(--bg-tertiary); }
+::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
 
 /* Pin both scrollbars inside the viewport when a tab's main content
    is a wide table. Without this, a tall table pushes its horizontal
    scrollbar off-screen because the whole tab scrolls vertically. */
-.tab-content.active:has(.table-scroll):not(#settings-tab):not(#users-tab):not(#client-detail-tab) { overflow: hidden; }
-.tab-content.active:has(.table-scroll):not(#settings-tab):not(#users-tab):not(#client-detail-tab) > .card { flex: 1; min-height: 0; }
+.tab-content.active:has(> .card:only-child .table-scroll):not(#settings-tab):not(#users-tab):not(#client-detail-tab) { overflow: hidden; }
+.tab-content.active:has(> .card:only-child .table-scroll):not(#settings-tab):not(#users-tab):not(#client-detail-tab) > .card { flex: 1; min-height: 0; }
 /* Every wrapper between .card and .table-scroll must be a flex column
    so heights propagate. This catches render-target divs (#images-table)
    and subtab wrappers (#images-subtab, #clients-subtab) transparently. */
@@ -764,8 +767,15 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 }
 
 @media (max-width: 768px) {
-    .sidebar { display: none; }
-    .tabs { display: flex !important; }
+    .app-layout { flex-direction: column; }
+    .sidebar { width: 100%; flex: none; border-right: 0; border-bottom: 1px solid var(--border); }
+    .sidebar-nav { display: flex; overflow-x: auto; padding: 4px; }
+    .nav-group { display: flex; margin: 0; }
+    .nav-group-label, .sidebar-footer { display: none; }
+    .nav-item { width: auto; margin: 0; white-space: nowrap; }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .stat-card { padding: 8px; }
+    .stat-label { white-space: normal; }
     th, td { padding: 8px; font-size: 12px; }
     .content-area { padding: 16px; }
     .card { padding: 18px; }

@@ -13,6 +13,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"bootimus/internal/auth"
 	"bootimus/internal/bmc"
 	"bootimus/internal/models"
 
@@ -128,7 +129,11 @@ func (s *Server) handleClientConsole(w http.ResponseWriter, r *http.Request) {
 		}
 		claims, err := s.config.Auth.AuthenticateToken(token)
 		if err != nil {
-			writeJSONError(w, http.StatusUnauthorized, err.Error())
+			status := http.StatusUnauthorized
+			if errors.Is(err, auth.ErrAuthUnavailable) {
+				status = http.StatusServiceUnavailable
+			}
+			writeJSONError(w, status, err.Error())
 			return
 		}
 		if !claims.IsAdmin {

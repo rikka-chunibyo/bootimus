@@ -1,5 +1,5 @@
 {
-  "version": "0.1.80",
+  "version": "0.1.81",
   "profiles": [
     {
       "id": "ubuntu",
@@ -95,7 +95,7 @@
     },
     {
       "id": "proxmox",
-      "display_name": "Proxmox VE",
+      "display_name": "Proxmox",
       "family": "debian",
       "filename_patterns": ["proxmox-ve", "proxmox"],
       "kernel_paths": ["/boot/linux26"],
@@ -103,7 +103,16 @@
       "squashfs_paths": [],
       "default_boot_params": "initrd=initrd ramdisk_size=16777216 rw quiet",
       "auto_install_type": "proxmox",
-      "boot_method": "kernel"
+      "boot_method": "kernel",
+      "mirrors": [
+        {"region": "Global (Official)", "base": "https://enterprise.proxmox.com/iso"}
+      ],
+      "releases": [
+        {"label": "VE 9.2-1 Installer (amd64)", "path": "/proxmox-ve_9.2-1.iso", "sha256": "4e88fe416df9b527624a175f24c9aa07c714d3332afb1ee3dbf3879573ef2c6c"},
+        {"label": "VE 8.4-1 Installer (amd64)", "path": "/proxmox-ve_8.4-1.iso", "sha256": "d237d70ca48a9f6eb47f95fd4fd337722c3f69f8106393844d027d28c26523d8"},
+        {"label": "Backup Server 4.2-1 Installer (amd64)", "path": "/proxmox-backup-server_4.2-1.iso", "sha256": "2fb299deac3929253712c9c3dfc9237edbe70af83c8848467616b771a1d5453e"},
+        {"label": "Backup Server 3.4-1 Installer (amd64)", "path": "/proxmox-backup-server_3.4-1.iso", "sha256": "ed4777f570f2589843765fff9e942288ff16a6cc3728655733899188479b7e08"}
+      ]
     },
     {
       "id": "truenas-scale",
@@ -129,13 +138,12 @@
       "auto_install_type": "preseed",
       "boot_method": "kernel",
       "mirrors": [
-        {"region": "Global (Official)", "base": "https://cdimage.debian.org/debian-cd/current/amd64"},
-        {"region": "UK (Bytemark)", "base": "https://mirror.bytemark.co.uk/debian-cd/current/amd64"},
-        {"region": "DE (GWDG)", "base": "https://ftp.gwdg.de/debian-cd/current/amd64"}
+        {"region": "Global (Official)", "base": "https://cdimage.debian.org/debian-cd"},
+        {"region": "SE (Academic Computer Club)", "base": "https://ftp.acc.umu.se/debian-cd"}
       ],
       "releases": [
-        {"label": "13 (Trixie) DVD-1 (amd64)", "path": "/iso-dvd/debian-13.5.0-amd64-DVD-1.iso"},
-        {"label": "13 (Trixie) Netinst (amd64)", "path": "/iso-cd/debian-13.5.0-amd64-netinst.iso"}
+        {"label": "13.8 (Trixie) DVD-1 (amd64)", "path": "/13.8.0/amd64/iso-dvd/debian-13.8.0-amd64-DVD-1.iso"},
+        {"label": "13.8 (Trixie) Netinst (amd64)", "path": "/13.8.0/amd64/iso-cd/debian-13.8.0-amd64-netinst.iso"}
       ]
     },
     {
@@ -490,12 +498,11 @@
       "auto_install_type": "",
       "boot_method": "kernel",
       "mirrors": [
-        {"region": "Global (Official)", "base": "https://cdimage.kali.org/current"},
-        {"region": "DE (Kumi)", "base": "https://mirror.kumi.systems/kali-images/current"}
+        {"region": "Global (Official)", "base": "https://cdimage.kali.org"}
       ],
       "releases": [
-        {"label": "2024.4 Live (amd64)", "path": "/kali-linux-2024.4-live-amd64.iso"},
-        {"label": "2024.4 Installer (amd64)", "path": "/kali-linux-2024.4-installer-amd64.iso"}
+        {"label": "2026.3 Installer (amd64)", "path": "/kali-2026.3/kali-linux-2026.3-installer-amd64.iso", "sha256": "db9cbed33edb45727d16911813c2434fcd1419585007884153be22a03b30ec2f"},
+        {"label": "2026.3 NetInstaller (amd64)", "path": "/kali-2026.3/kali-linux-2026.3-installer-netinst-amd64.iso", "sha256": "0dd3e70f2e0b092286b29355450bc79a034a13fb1d5b4bf83c297149115258cd"}
       ]
     },
     {
