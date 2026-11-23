@@ -65,77 +65,59 @@ I've used Claude CLI to help with some parts of this project - mostly making the
 
 ## Quick Start
 
-### Docker (Recommended)
+Clone this fork first. Both the Docker image and the standalone binary are
+built from this checkout.
 
 ```bash
-# Create data directory
-mkdir -p data
-
-# Run with SQLite (no database container needed)
-docker run -d \
-  --name bootimus \
-  --cap-add NET_BIND_SERVICE \
-  -p 69:69/udp \
-  -p 8080:8080/tcp \
-  -p 8081:8081/tcp \
-  -v $(pwd)/data:/data \
-  garybowers/bootimus:latest
-
-# Check logs for admin password
-docker logs bootimus | grep "Password"
-
-# Access admin interface
-open http://localhost:8081
+git clone https://github.com/rikka-chunibyo/bootimus.git
+cd bootimus
 ```
 
-A docker logo is available, see Bootimus `bootimus_logo.png`.
-Ex.: it can be used with unraid with: https://raw.githubusercontent.com/garybowers/bootimus/logos/bootimus_logo_square_ulow.png
+### Docker (Recommended)
 
-On Unraid you can find an App/Template called "bootimus" for easy installation. Consider using a "custom network" with an dedicated ip address for bootimus docker.
+On a Linux host with Docker and BuildKit, build the fork and run it with SQLite
+and a persistent data directory.
+
+```bash
+docker build -t bootimus:fork .
+mkdir -p data
+docker run -d --name bootimus --restart unless-stopped \
+  --network host -v "$PWD/data:/data" bootimus:fork
+docker logs bootimus 2>&1 | grep 'Password:'
+```
+
+Sign in to the admin UI at `http://<server-ip>:8081` as `admin`. If Bootimus
+should provide PXE boot information alongside your existing DHCP server, add
+`serve --proxy-dhcp` after the image name. See [DHCP Configuration](docs/en/dhcp.md).
 
 ### Standalone Binary
 
+On Linux, install GNU Make and use the Go toolchain specified in
+[`go.mod`](go.mod). Build and run the binary from the same fork checkout.
+
 ```bash
-# Download binary
-wget https://github.com/garybowers/bootimus/releases/latest/download/bootimus-amd64
-chmod +x bootimus-amd64
-
-# Run (SQLite mode - no database required)
-./bootimus-amd64 serve
-
-# Admin panel: http://localhost:8081
+make build
+sudo ./bootimus serve --data-dir "$PWD/data"
 ```
+
+The command uses SQLite and starts the admin UI on port 8081. Sign in as
+`admin` with the password printed on first startup. The default TFTP port
+requires permission to bind to a privileged port.
 
 Install `bsdtar` (`libarchive-tools` on Debian/Ubuntu, `libarchive` on Arch and Fedora) alongside the binary. Bootimus uses it to extract ISOs with their full Rock Ridge and Joliet file names; without it, extraction falls back to a built-in reader that can shorten long names on some ISOs, which breaks RPM repositories. The Docker image already includes it.
 
 ### Docker Compose
 
+From the fork checkout, the included Compose file builds Bootimus locally
+and starts it with PostgreSQL.
+
 ```bash
-git clone https://github.com/garybowers/bootimus
-cd bootimus
-docker-compose up -d
+docker compose up -d --build
+docker compose logs bootimus 2>&1 | grep 'Password:'
 ```
 
-### Archlinux aur packages
-
-[![bootimus](https://img.shields.io/aur/version/bootimus?label=bootimus)](https://aur.archlinux.org/packages/bootimus/)
-[![bootimus-bin](https://img.shields.io/aur/version/bootimus-bin?label=bootimus-bin)](https://aur.archlinux.org/packages/bootimus-bin/)
-
-bootimus is available on the [AUR](https://wiki.archlinux.org/index.php/Arch_User_Repository):
-- [bootimus](https://aur.archlinux.org/packages/bootimus/) (release package with systemd integration)
-- [bootimus-bin](https://aur.archlinux.org/packages/bootimus-bin/) (standalone binary release package)
-
-You can install it using your [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) of choice.
-
-Example:
-```shell
-$ yay -Sy bootimus
-
-# Edit /etc/bootimus/bootimus.yaml with your preference
-
-# And start the service
-$ systemctl start bootimus
-```
+For LAN clients, set `BOOTIMUS_SERVER_ADDR` in `docker-compose.yml` to the
+Docker host's LAN address before starting the stack.
 
 ## Documentation
 
@@ -368,35 +350,6 @@ subnet 192.168.1.0 netmask 255.255.255.0 {
 
 See [DHCP Configuration Guide](docs/en/dhcp.md) for Dnsmasq, MikroTik, Ubiquiti, and more.
 
-## Building from Source
-
-```bash
-# Clone repository
-git clone https://github.com/garybowers/bootimus
-cd bootimus
-
-# Build and run locally
-make build
-make run
-
-# Build container image locally
-make docker-build
-
-# Start services via docker compose
-make docker-up
-
-# Build all platform binaries for GitHub release
-make release
-
-# Build and push multi-arch container to Docker Hub
-make docker-push
-
-# Push amd64 only (faster, skips arm64 QEMU emulation)
-make docker-push PLATFORMS=linux/amd64
-```
-
-Run `make help` for all available targets.
-
 ## Security Considerations
 
 - **Read-only TFTP**: TFTP server is read-only (no write operations)
@@ -517,6 +470,6 @@ Contributions welcome! Please open an issue or pull request.
 
 ## Links
 
-- **GitHub**: https://github.com/garybowers/bootimus
-- **Docker Hub**: https://hub.docker.com/r/garybowers/bootimus
-- **Documentation**: https://github.com/garybowers/bootimus/tree/main/docs
+- [Fork repository](https://github.com/rikka-chunibyo/bootimus)
+- [Upstream repository](https://github.com/garybowers/bootimus)
+- [Documentation](docs)

@@ -44,3 +44,18 @@ func TestCgroupMemoryUsesParentHeadroom(t *testing.T) {
 		t.Fatalf("container memory = %+v, want %+v", got, want)
 	}
 }
+
+func TestCgroupMemoryKeepsNativeStatsWithoutLimit(t *testing.T) {
+	root := t.TempDir()
+	membership := filepath.Join(root, "self.cgroup")
+	if err := os.WriteFile(membership, []byte("0::/system.slice/bootimus.service\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "memory.max"), []byte("max\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	host := memoryFromAvailable(16<<30, 6<<30)
+	if got := cgroupMemory(host, root, membership); got != host {
+		t.Fatalf("native memory = %+v, want %+v", got, host)
+	}
+}
